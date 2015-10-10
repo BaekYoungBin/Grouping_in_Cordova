@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html manifest="cache.manifest" lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+	<script src="js/Community.js"></script>
+</head>
+
+<body>
+	<div data-role="page" data-theme="a" style="text-align:center">
+		<div data-role="header" data-position="fixed" data-tap-toggle="false"> 
+			<h3>팀원 찾기 커뮤니티</h3>
+			<a href="#" data-icon="arrow-l" onclick ="location.replace('tab_memo.html');" class="ui-btn-left">뒤로</a>
+			<a href="#Community_Write" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-edit ui-btn-icon-left ui-btn-a" data-transition="pop">글쓰기</a>
+		</div>
+		
+		<div data-role="popup" id="Community_Write" data-theme="a" class="ui-corner-all">
+			<form>
+				<div style="padding:10px 20px;">
+					<h3>새 글 쓰기</h3>
+					<label for="Community_title">제목</label>
+					<input type="text" name="Community_title" id="Community_title" value="" placeholder="제목" data-theme="a">
+
+					<label for="Community_Content">내 용</label>
+					<textarea cols="40" rows="8" name="Community_Content" id="Community_Content" placeholder="알리고싶은 말을 쓰세요"></textarea>
+
+					<button><a href='' class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-btn-icon-left ui-icon-edit" onclick='writefnc();'>추가</a></button>
+				</div>
+			</form>
+		</div><!-- popup -->
+
+		<div data-role="content">
+			
+			<ul data-role="listview" data-inset="true" data-filter="true" id = "board" data-input="#Community_search">		
+			</ul>		
+		</div>
+		<div data-role="footer" data-position="fixed" data-tap-toggle="false">
+			<div class="ui-grid-b">
+
+				<div class="ui-block-a" style="width:2%;">
+				</div>
+
+				<div  class="ui-block-b" style="width:80%;">
+					<form class="ui-filterable">
+						<input id="Community_search" data-type="search" placeholder="검색할 이름 및 이메일을 입력하세요">
+					</form>
+				</div>
+
+				<div class="ui-block-c" style="width:8%; padding-top:2px;">
+					<input type="submit"value="검색">
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

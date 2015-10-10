@@ -1,0 +1,260 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet"
+	href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+	<link rel="stylesheet" href="css/icon.css" />
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script	src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+</head>
+<script>
+
+
+	$.ajax({
+		url : 'http://54.65.71.36:8080/appshowmemo',
+		dataType : 'json',
+		type : 'POST',
+		data :  
+		{
+			'Project_Work_Id' : localStorage.getItem('Project_Work_Id')
+		},
+		success : function(result){
+
+    	  //할일 정보 보여주는 부분
+    	  var Work = new Array();   
+    	  var memodataform = JSON.stringify(result);
+    	  var memotemp = JSON.parse(memodataform);
+    	  var dataform = JSON.stringify(result.Work_Person);
+    	  var temp = JSON.parse(dataform);
+    	  var count = temp.length;   
+    	  var text = '';         
+    	  if(count == 0){
+    	  	text = '';
+    	  }
+    	  else
+    	  {
+    	  	for(var i = 0; i<count-1; i++){         
+    	  		text += temp[i].User_Name + ', ';   
+    	  	}
+    	  	text += temp[i].User_Name;
+    	  }         
+    	  var Work_Finish = '';
+    	  if(result.Work_Finish == 'false'){
+    	  	Work_Finish = '진행 중';
+    	  }
+    	  else
+    	  {
+    	  	Work_Finish = '완료';
+    	  }
+
+    	  $('#memosubject').append(result.Work_Name);
+    	  $('#memoperson').append(text);
+    	  $('#memdetail').append(result.Work_Memo);
+    	  $('#memoSday').append(result.Work_Sday);
+    	  $('#memoDday').append(result.Work_Dday);
+    	  $('#memoFinish').append(Work_Finish);
+
+    	}
+    });
+
+
+
+
+var Work = [];
+$.ajax({
+	url : 'http://54.65.71.36:8080/appgetcomment',
+	dataType : 'json',
+	type : 'POST',
+	data : {
+		'Project_Work_Id' : localStorage.getItem('Project_Work_Id')
+	},
+	success : function(result) {		
+		var memodataform = JSON.stringify(result);
+		var memotemp = JSON.parse(memodataform);
+		var memocount = memotemp.length;			
+		var list = [];
+		var index = 0;		
+		for (var i = 0; i < memocount; i++) {
+			list.push({
+				'comment' : memotemp[i].Comment,
+				'c_User' : memotemp[i].Comment_User,
+				'comment_id' : memotemp[i]._id
+			});	
+		}		
+			//댓글 보여주는 부분			
+			var text = "";
+			$.each(list, function(index, item){		
+				
+				if(item.c_User == localStorage.getItem('User_Name')){
+					text += "<div class='ui-block-a' style='width:80%'>"+item.c_User+"<p style='white-space: normal;'>"
+					+item.comment
+					+"</p></div><div id = '"+item.comment_id+"' class='ui-block-b' style='width:20%'>"+"<a  href='' data-rel='popup' data-position-to='window' class='modifyComment ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-check ui-btn-icon-notext'>수정</a>"
+					+"<a href='' class='deleteComment ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-delete ui-btn-icon-notext' rel = 'external'>삭제</a></div>";
+				}
+				else{
+					text += "<div class='ui-block-a' style='width:80%'>"+item.c_User+"<p style='white-space: normal;'>"
+					+item.comment
+					+"</p></div><div id = '"+item.comment_id+"' class='ui-block-b' style='width:20%'></div>";
+				}
+			});			
+			$('#memocomment').empty();
+			$('#memocomment').listview().listview('refresh'); 
+			$('#memocomment').append(text).listview('refresh');	
+			$('#comment_add').empty();
+			text = "";
+			index = 0;
+			list = [];			
+		}	
+	});
+$(document)
+.on(
+	"click",
+	".modifyComment",
+	function() {
+		localStorage.setItem('Comment_Id',  $(this).parent().attr('id'));
+		console.log('이거됨');
+		console.log(localStorage.getItem('Comment_Id'));
+		$('#comment_modify').popup("open");
+	});
+
+$(document).on("click", ".deleteComment", function(){	
+	var deleteid = $(this).parent().attr('id');
+	$.ajax({
+		url : 'http://54.65.71.36:8080/appdeletecomment',
+		dataType : 'json',
+		type : 'POST',
+		data : {
+			'Delete_CommentId' : deleteid
+		},
+		success : function(data) {
+			location.replace('memo_show.html');											
+		}
+	});	
+	
+});
+
+
+function modifycomment(){	
+	var Insert_CommentId = localStorage.getItem('Comment_Id');
+	console.log($("#comment_area").val());
+	console.log('qwekjeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+	$.ajax({
+		url : 'http://54.65.71.36:8080/appmodifycomment',
+		dataType : 'json',
+		type : 'POST',
+		data : {
+			'Insert_CommentId' : Insert_CommentId,
+			'Comment' : $("#comment_area").val()
+		},
+		success : function(result) {		
+			console.log('수정 성공!!!');
+			location.replace('memo_show.html');
+		}
+	});
+}
+
+function commentadd(){
+	
+	$.ajax({
+		url : 'http://54.65.71.36:8080/appaddcomment',
+		dataType : 'json',
+		type : 'POST',
+		data : {
+			'Project_Work_Id' : localStorage.getItem('Project_Work_Id'),
+			'Comment_User' : localStorage.getItem('User_Name'),
+			'Comment' : $("#comment_add").val()
+		},
+		success : function(result) {	
+			console.log('memoadd complete');
+			
+			location.replace('memo_show.html');			
+		}
+	});
+	
+}
+function gototab_memo(){
+	location.replace('tab_memo.html');
+}
+
+</script>
+
+<body>
+
+	<div data-role="page" id="page">
+
+		<div data-role="header" data-position="fixed">
+			<h4></h4>
+			<a href="" data-icon="arrow-l" class="ui-btn-left" rel="external" onclick ="gototab_memo();">뒤로</a>
+			
+			<a href="memo_modify.html" rel="external"
+			data-icon="arrow-l" class="ui-btn-right">수정</a>
+		</div>
+
+		<div data-role="content">
+
+			<form>
+				<ul data-role="listview" data-inset="false">
+					<li class="ui-field-contain">  
+						<ul data-role="listview" data-inset="true">
+							<li data-role="list-divider">메모명</li>
+							<li id="memosubject"></li>
+							<li data-role="list-divider">참여자</li>
+							<li id="memoperson"></li>
+							<li data-role="list-divider">업무완성도</li>
+							<li id="memoFinish"></li>
+							<li data-role="list-divider">기간</li>
+							<li><span id="memoSday"></span> ~ <span id="memoDday"></span></li>
+							<li data-role="list-divider">할일</li>
+							<li id="memdetail"></li>
+						</ul>
+					</li>
+				</ul>
+			</form>
+		</div>
+
+		<div data-role="footer">
+			<div data-role="popup" id="comment_modify" data-theme="a"
+			class="ui-corner-all" data-dismissible="false">
+			<form>
+				<div style="padding: 10px 20px;">
+					<h3>댓글 수정</h3>
+					<label for="comment_area">내용</label>
+					<textarea cols="40" rows="8" name="comment_area" id="comment_area"></textarea>
+					<a href="#"
+					class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-check ui-btn-icon-left"
+					rel="external" data-transition="flow" onclick = "modifycomment();">수정</a> <a href="#"
+					class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-back ui-btn-icon-left"
+					rel="external" onclick = "location.replace('memo_show.html');">취소</a>
+				</div>
+			</form>
+		</div>
+		<!-- 댓글 popup -->
+
+		<h4>댓글</h4>
+
+		<ul data-role="listview" data-inset="false">
+			<li class="ui-grid-a" id="memocomment">			
+			</li>
+
+			<li class="ui-grid-b">
+				<div class="ui-block-a" style="width: 80%;">
+					<textarea name="comment_add" id="comment_add"></textarea>
+				</div>
+				<div class="ui-block-b" style="width: 20%; padding-top: 7px;">
+					<a href="#"
+					class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b ui-icon-plus ui-btn-icon-left"
+					onclick="commentadd();" rel="external" style="height: 20px;">추가</a>
+				</div>
+			</li>
+		</ul>
+
+	</div>
+</div>
+
+</body>
+</html>

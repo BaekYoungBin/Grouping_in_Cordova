@@ -1,0 +1,99 @@
+<!DOCTYPE html> 
+<html manifest="cache.manifest">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+  <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+		
+	</head>
+<script>
+$.ajax({
+	url : 'http://54.65.71.36:8080/AppGetVoteInfo',
+	dataType : 'json',
+	type : 'POST',
+	data : {
+		'Vote_Id' : localStorage.getItem('Vote_Id')		
+	//프로젝트 내용
+	},
+	success : function(data) {		
+		var Vote_Opt = data[0].Vote_Opt;
+		console.log(Vote_Opt.length);
+		console.log('정보 보여줄게곧');
+		var text ='';
+		for(var i = 0; i<Vote_Opt.length; i++){
+			text += '<li><input type="radio" name="vote" id = "'+Vote_Opt[i]+'">'+Vote_Opt[i]+'</li>';
+			
+		
+		}
+		
+		var subject = document.getElementById('votesbj');
+		subject.innerHTML = data.Vote_Name
+		$('#vote').append(text).listview('refresh');	
+		
+
+	}
+});
+
+$(document).on('click', '#vote_do_btn', function(){
+//	alert('bb');
+console.log('fffff');
+	var radio = document.getElementsByName('vote');
+	var number;
+	
+	// index번째 list의 옵션중 라디오버튼으로 선택된 옵션의 cnt를 1 증가시키는 for문입니다
+	for(var i = 0; i<radio.length; i++){
+		if(radio[i].checked) {
+		number = i;
+		optname = radio[i].id;
+	//	alert(radio[i].id);
+		}
+	}
+	console.log('히히');
+	 $.ajax({
+	url: 'http://54.65.71.36:8080/AppVoteDone',
+	dataType: 'json',
+	type : 'POST',
+	data: {
+		 'id' :localStorage.getItem('Vote_Id'),
+		 'index' : optname,
+		 'User_Name' : localStorage.getItem('User_Name')
+	},
+	success: function(result) {
+	location.replace('vote_list.html');
+	}
+});
+
+
+//	list[index].Member.push(user);		// voter(기투표자)에 현재 유저를 추가합니다.
+//	prepare();		// prepare()를 호출해 추가된 투표를 투표리스트에 보이도록 합니다.
+});
+
+
+
+
+</script>
+	<body>
+		<div data-role="header" data-theme="a">
+			<h2></h2>
+			<a href="#" data-rel="back" data-icon="arrow-l" class="ui-btn-left">뒤로</a>
+		</div>
+
+		<div data-role="content" data-theme="a">
+		<ul data-role="listview" data-inset="false">
+			<li data-role="list-divider" id ="votesbj" style="text-align: center;">1월 4일 회식 메뉴 정하기</li>
+		</ul><br>
+			
+			<form id="voting">
+		<ul data-role="listview" data-inset="true"  id ="vote">
+
+    </ul>
+				<button type="button" class="vote_btn" id="vote_do_btn" >투표 완료</button>
+			</form>
+		</div>
+	</body>
+	</html>

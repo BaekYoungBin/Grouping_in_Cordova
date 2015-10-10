@@ -1,0 +1,114 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+  <link rel="stylesheet" href="css/icon.css" />
+  <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <script src="fastclick.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+  <script src="jquery.ui.touch-punch.min.js"></script>
+  <script>
+    $.mobile.defaultPageTransition   = 'none'
+    $.mobile.defaultDialogTransition = 'none'
+    $.mobile.buttonMarkup.hoverDelay = 0
+  </script>
+  
+  <script type='text/javascript' src='http://arshaw.com/js/fullcalendar-1.5.4/fullcalendar/fullcalendar.min.js'></script>
+  <link rel='stylesheet' type='text/css' href='http://arshaw.com/js/fullcalendar-1.5.4/fullcalendar/fullcalendar.css' />
+
+  <script>
+   $(document).on('pageshow','#index',function(e,data){    
+    var date = new Date();
+    var d = date.getDate();
+    var m = date.getMonth();
+    var y = date.getFullYear();   
+    $('#calendar').fullCalendar({
+      editable: true,
+      startEditable: true,
+      durationEditable: true,
+            //disableDragging: true,      
+            events: function(start, end, callback) {
+              $.ajax({
+                url: 'http://54.65.71.36:8080/Calendar_Getdata',
+                dataType: 'json',
+                type : 'POST',
+                data: {
+                 'Project_Id' : localStorage.getItem('Project_Id')
+               },
+               success: function(data, text, request) {
+                 var dataform = JSON.stringify(data);                
+                 var temp = JSON.parse(dataform);
+                 count = temp.length;                 
+                 console.log(count);
+                 console.log(data[0].Work_Name);
+                 console.log(data[0].Work_Sday);
+                 var events=[];
+                 var jsontext = new Array();                                        
+                 for(var i = 0; i< count; i++){                            
+                  var Dday = (data[i].Work_Dday).split('-');
+                  var Sday = (data[i].Work_Sday).split('-');
+                  events.push({
+                    workid : data[i]._id,
+                    title : data[i].Work_Name,
+                    start : new Date(Sday[0], Sday[1]-1, Sday[2]),
+                    end : new Date(Dday[0], Dday[1]-1, Dday[2])                        
+                  });                     
+                }       
+                console.log(events);                                   
+                callback(events);
+              }
+            });
+},
+eventDrop: function(event){
+  console.log(event.title); 
+  console.log(event.workid);  
+  var sy = event.start.getUTCFullYear();
+  var sm = event.start.getUTCMonth() + 1;
+  var sd = event.start.getUTCDate();
+  var dy = event.end.getUTCFullYear();
+  var dm = event.end.getUTCMonth() + 1;
+  var dd = event.end.getUTCDate()+1;               
+  var Sday = sy+'-'+sm+'-'+sd;
+  var Dday = dy+'-'+dm+'-'+dd;
+  
+  $.ajax({
+    url: 'http://54.65.71.36:8080/Calendar_Modify',
+    dataType: 'json',
+    type : 'POST',
+    data: {          
+     'Work_Id' : event.workid,
+     'Work_Sday':Sday,
+     'Work_Dday':Dday 
+   },
+   success: function(result) {
+     console.log('업데이트 완료')
+   }
+ }); 
+  
+}
+
+
+});
+});
+
+</script>
+</head> 
+<body> 
+  <div data-role="page" id="index">
+
+    <div data-role="header">
+      <h1>My Team</h1>
+    </div><!-- /header -->
+    
+    <div data-role="content">       
+      <div id='calendar' style="width:100%;"></div>
+    </div><!-- /content -->
+
+  </div><!-- /page -->
+</body>
+</html>

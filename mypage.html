@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html manifest="cache.manifest">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width; initial-scale=1.0">
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+	<script>
+	
+		$(document).ready(function(){
+								document.getElementById('aabc').src = "http://54.65.71.36:8080/AppMyImage";	
+								// 개인정보 가져오기 ---------------
+					// name, email, contribution 값을 데이터베이스에서 읽어 변수에 입력합니다.		
+					// 데이터를 알맞은 곳에 표시합니다.
+					$('#name').text(localStorage.getItem('User_Name'));
+					$('#email').text(localStorage.getItem('User_Email'));
+					$('#contribution').text('0');	
+					console.log(localStorage.getItem('User_Id'));
+					
+						
+
+				// 할 일 가져오기 ---------------
+				// 해당 user의 task를 데이터베이스에서 읽어 배열에 입력합니다.
+				
+				
+				 $.ajax({
+            		url: 'http://54.65.71.36:8080/AppGetMyList',
+            		dataType: 'json',
+            		type : 'POST',
+            		data: {            			
+            			'User_Id' : localStorage.getItem('User_Id')
+            					},
+            		success: function(result) {
+            			var dataform = JSON.stringify(result.suc);
+            			var temp = JSON.parse(dataform);
+            			console.log('서버에서 온 데이터'+dataform);
+            			var Work_Name = new Array();
+            			var Project_Name = [];
+            			var Task_Count = new Array();
+            			for(var i = 0; i < temp.length; i++) {
+            				
+            			 Project_Name[i] = temp[i]._id;         			 
+            				var form = JSON.stringify(temp[i].Work_Name);
+            			        var kk = JSON.parse(form);
+            				Task_Count[i] = kk.length;
+            				console.log(Task_Count[i]);
+            				 Work_Name[i] = new Array();
+            				for(var j=0 ; j <kk.length ;j++){
+            					Work_Name[i][j] = kk[j];
+            				}
+            			}            		
+            			var List = new Array();
+            			for (var i = 0; i < temp.length; i++) {
+            				console.log(Project_Name[i]);
+            				List.push({  
+            					'Project_Name': Project_Name[i]
+            				});
+            			}
+            			console.log('프로젝트이름 추가합니다.');
+            			var text = "";
+            			var addId = 0;
+            			$.each(List, function(index, item){
+            				text += "<option value="+addId+">" + item.Project_Name + "</option>";
+            				//text += "<li id = '"+addId+"'><a>"+item.Project_Name+"</a></li>";
+            			addId++;
+            			});       			
+            			    
+            		$('#mypage_prj').empty();
+            		$('#mypage_prj').append(text).selectmenu('refresh');	
+            			text = "";
+            			index = 0;		   	
+            			var selected = "선택되지 않았습니다";
+            			console.log('exid');
+            			console.log(Task_Count[0]);
+            			console.log(Work_Name[0][0]);
+            			
+    	
+    				var WList = new Array();
+    				console.log('page');
+    				   for(var j =0 ; j < Task_Count[0] ; j++) {
+    		                        WList.push({
+    		                                'Work_Name' : Work_Name[0][j]
+    		                        });
+    		                        console.log(Work_Name[0][j]);
+    		                }
+    				// 리스트에 선택된 프로젝트의 업무를 보여줍니다
+    				text = "";
+    				$.each(WList, function(index, item){            				
+    						text += "<tr><td class='list-group-item'>" + item.Work_Name + "</td></tr>";
+    				});
+    				var task_view  = document.getElementById('mytask');
+    				task_view.innerHTML = text;
+   				
+    		
+            		 	
+            			$("select").change(function() { 
+            				console.log($( "select option:selected" ).val());
+            				selected = $( "select option:selected" ).val();
+            				var task_view  = document.getElementById('mytask');
+            				//alert(List[selected].Project_Name);           				
+            				var WList = new Array();
+            				console.log('page');
+            				   for(var j =0 ; j < Task_Count[selected] ; j++) {
+            		                        WList.push({
+            		                                'Work_Name' : Work_Name[selected][j]
+            		                        });
+            		                        console.log(Work_Name[selected][j]);
+            		                }
+            				// 리스트에 선택된 프로젝트의 업무를 보여줍니다
+            				text = "";
+            				$.each(WList, function(index, item){            				
+            						text += "<tr><td class='list-group-item'>" + item.Work_Name + "</td></tr>";
+            				});
+            				task_view.innerHTML = text;
+            				
+            				}); 
+             
+            		}
+				});	 
+            			// 나가기 클릭
+            			
+					
+		});
+			
+            	
+
+		 function gotomain(){
+			location.replace('tab_memo.html');
+		}
+		
+		function ChangeInfo() {
+			// 입력받은 데이터
+			var newName = document.getElementById('mypage_modify_name').value;
+			var cmpPw = document.getElementById('present_pw').value;
+			var newPw = document.getElementById('new_pw').value;
+			var newPwre = document.getElementById('new_pw_check').value;
+			$.ajax({
+				url : 'http://54.65.71.36:8080/AppMyEdit',
+				dataType : 'json',
+				type : 'POST',
+				data : {
+					'User_Name' : newName,
+					'User_Pass' : cmpPw,
+					'New_Pass' : newPw,
+					'Pre_Pass' : localStorage.getItem('User_Pass'),
+					'User_Email' : localStorage.getItem('User_Email')
+				//프로젝트 내용
+				},
+				success : function(result) {
+					if (result.suc == false) {
+						alert("비밀번호가 일치하지 않습니다!");
+					} else {
+						alert(newName + "과 " + newPw + "으로 변경");
+					}
+					localStorage.setItem('User_Name', newName);
+					localStorage.setItem('User_Pass', newPw);
+					$('#name').text(localStorage.getItem('User_Name'));
+					$('#email').text(localStorage.getItem('User_Email'));
+					console.log('왜 리플레이스 안해주냐고');
+					location.replace('mypage.html');
+
+				}
+			});
+
+			// 비밀번호 일치 확인
+			$(document).on("blur", "#new_pw_check", function() {
+				if ($('#upd_pw').val() != $('#new_pw_check').val()) {
+					$('#pw_msg').css('display', 'block');
+				}
+			});
+			$(document).on("focus", "#new_pw", function() {
+				$('#pw_msg').css('display', 'none');
+			});
+			$(document).on("focus", "#new_pw_check", function() {
+				$('#pw_msg').css('display', 'none');
+			});
+		}
+
+		document.addEventListener("deviceready", onDeviceReady, false);
+
+		// PhoneGap is ready
+		function onDeviceReady() {
+			// Do cool things here...
+		}
+
+		function getImage() {
+			// Retrieve image file location from specified source
+			navigator.camera.getPicture(uploadPhoto, function(message) {
+				alert('get picture failed');
+			}, {
+				quality : 50,
+				destinationType : navigator.camera.DestinationType.FILE_URI,
+				sourceType : navigator.camera.PictureSourceType.PHOTOLIBRARY
+			});
+
+		}
+
+		function uploadPhoto(imageURI) {
+
+			var options = new FileUploadOptions();
+			options.fileKey = "file";
+			options.fileName = localStorage.getItem('User_Id');
+			options.mimeType = "image/jpeg";
+			var params = new Object();
+			params.value1 = "test";
+			params.value2 = "param";
+			options.params = params;
+			options.chunkedMode = false;
+			var ft = new FileTransfer();
+			ft.upload(imageURI, "http://54.65.71.36:8080/upphoto", win,
+					fail, options);
+
+		}
+
+		function win(r) {
+			console.log("Code = " + r.responseCode);
+			console.log("Response = " + r.response);
+			console.log("Sent = " + r.bytesSent);
+			alert(r.response);
+
+			location.replace('mypage.html');
+		}
+
+		function fail(error) {
+			alert("An error has occurred: Code = " = error.code);
+		}
+	</script>
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<style type = "text/css">
+			body { 
+				color: #404040;
+				font-family: '함초롬돋움';
+				font-size: 1em;
+				line-height: 1.2em;
+				text-align: center;
+			}
+			table{
+				text-align: center;
+				width: 23em;
+				margin: 0 auto;
+			}
+			td{
+				border-bottom: 1px solid gray;
+				padding: 0.2em;
+			}
+		
+		</style>
+		
+	</head>
+
+	<body>
+	
+		<div data-role="page">
+			<div data-role="header" data-theme="e">
+				<h1>내정보 창입니다.</h1>
+				<a href="#" rel="external" onclick = "gotomain();"data-icon="arrow-l" class="ui-btn-left">뒤로</a>
+				<a href="#mypage_modify" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-edit ui-btn-icon-left ui-btn-a" data-transition="pop">수정</a>
+			</div>
+			<div data-role="popup" id="mypage_modify" data-theme="a" class="ui-corner-all">
+			<form>
+				<div style="padding:10px 20px;">
+					<h3>내 정보 수정</h3>
+					<label for="mypage_modify_name" class="ui-hidden-accessible">이름:</label>
+					<input type="text" name="user" id="mypage_modify_name" value="" placeholder="이름" data-theme="a">
+
+					<label for="present_pw" class="ui-hidden-accessible">현재 비밀번호:</label>
+					<input type="password" name="present_pw" id="present_pw" value="" placeholder="현재 비밀번호" data-theme="a">
+					
+					<label for="new_pw" class="ui-hidden-accessible">새 비밀번호:</label>
+					<input type="password" name="new_pw" id="new_pw" value="" placeholder="새 비밀번호" data-theme="a">
+
+					<label for="new_pw_check" class="ui-hidden-accessible">새 비밀번호 재입력:</label>
+					<input type="password" name="new_pw_check" id="new_pw_check" value="" placeholder="새 비밀번호 재입력" data-theme="a">
+ 					<div id="pw_msg" class="alertmsg">비밀번호가 일치하지 않습니다!</div>
+					<a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-btn-icon-left ui-icon-edit" onclick="ChangeInfo();">수정</a>
+				</div>
+			</form>
+		</div><!-- popup -->
+			<div data-role="content" data-theme="e">
+				<div id="info">
+			
+				<img id="profilephoto" src="" style="display:none;width:200%;">
+					<br> <!--프로필 이미지-->
+					<img id="aabc" src="" height=150 width=auto>
+					
+					
+					<button onclick="getImage();">Upload a Photo</button>
+					
+					<div>
+					<ul data-role="listview" id ="testlist" data-theme="a">				
+					</ul>
+					</div>
+					<br><br>
+					<table id="myinfo">
+						<tr>
+							<td>이름</td>
+							<td id="name"></td>
+						</tr>
+						<tr>
+							<td>이메일</td>
+							<td id="email"></td>
+						</tr>
+						<tr>
+							<td>기여도</td>
+							<td id="contribution"></td>
+						</tr>
+					</table>
+
+
+					<div id="task">
+				<h3>프로젝트에서 해야 할 일</h3>
+				<select name="mypage_prj" id="mypage_prj">
+					
+				</select>
+				<table id="mytask">
+				</table>
+			</div>
+					
+				</div>
+			</div>
+			
+		</div>
+		
+		
+		
+	</body>
+	</html>

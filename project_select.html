@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html manifest="cache.manifest">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<link rel="stylesheet"
+	href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" charset="utf-8" src="PushNotification.js"></script>
+	<script type="text/javascript" charset="utf-8" src="js/Get_Reg_ID.js"></script>
+	<script type="text/javascript" charset="utf-8" src="local-notification.js"></script>	
+	<script type="text/javascript">
+		console.log('project select');
+		var Project_Name = new Array();
+		var Project_Id = [];
+		var count;
+		$.ajax({
+			url : 'http://54.65.71.36:8080/appprojectinit',
+			dataType : 'json',
+			type : 'POST',
+			data : {
+				'User_Id' : localStorage.getItem('User_Id'),
+				'User_Email' : localStorage.getItem('User_Email'),
+				'User_Pass' : localStorage.getItem('User_Pass'),
+				'AppId' : localStorage.getItem('App_Id')
+			},
+			success : function(result) {
+				console.log('success project');
+				var dataform = JSON.stringify(result);
+				var temp = JSON.parse(dataform);
+				console.log(temp.length);
+				console.log(temp);
+				count = temp.length;
+				for (var i = 0; i < count; i++) {
+					Project_Name[i] = temp[i].Project_Name;
+					console.log(Project_Name[i]);
+					Project_Id[i] = temp[i].Project_Id;
+				}
+				var list = [];
+				for (var i = 0; i < count; i++) {
+					list.push({
+						'title' : Project_Name[i],
+						'Project_Id' : Project_Id[i]
+					});
+				}
+				var text = "";
+				$.each(list,function(index, item) {
+					text += "<li><a class='prj' id="+item.Project_Id+" name='"+item.title+"' href='' rel='external'><br>"
+					+ item.title + "<br></a></li>";
+
+				});
+				$('#pre_list').append(text).listview('refresh');
+			}
+		});
+
+function addproject() {
+	console.log($("#prj_name").val());
+	if($("#prj_name").val() == ''){
+		alert('프로젝트 명을 입력해주세요');
+	}
+	else if($("#prj_date").val() == ''){
+		alert('마감일을 입력해주세요');
+	}
+	else
+	{
+		$.ajax({
+			url : 'http://54.65.71.36:8080/appprojectcreate',
+			dataType : 'json',
+			type : 'POST',
+			data : {
+				'User_Id' : localStorage.getItem('User_Id'),
+				'User_Name' : localStorage.getItem('User_Name'),
+				'User_Email' : localStorage.getItem('User_Email'),
+				'Project_Name' : $('#prj_name').val(),
+				'Project_Dday' : $('#prj_date').val(),
+				'AppId' : localStorage.getItem('App_Id'),
+				//프로젝트 내용
+			},
+			success : function(result) {
+
+				console.log('success');
+				location.replace('project_select.html');
+			}
+		});
+
+	}
+
+}
+function deleteproject() {
+	console.log($("#prj_name").val());
+	console.log('delete function start');
+	$.ajax({
+		url : 'http://54.65.71.36:8080/appprojectdelete',
+		dataType : 'json',
+		type : 'POST',
+		data : {
+			'User_Id' : localStorage.getItem('User_Id'),
+			'User_Name' : localStorage.getItem('User_Name'),
+			'User_Email' : localStorage.getItem('User_Email'),
+			'Project_Id' : localStorage.getItem('Project_Id')
+
+			//프로젝트 내용
+		},
+		success : function(result) {
+
+			console.log('success');
+			location.replace('project_select.html');
+		}
+	});
+}
+$(document).on("pagecreate", function() {
+	$(document).on("taphold", ".prj", function() {
+		console.log('delete function');
+		localStorage.setItem("Project_Id", this.id);
+		console.log('this id??');
+		console.log(this.id);
+
+			var $deletepopup = $('#checkdelete'); // checkdelete popup창에 연결
+			$deletepopup.popup('open'); // checkdelete popup 열기
+			// $(this).remove();
+		});
+});
+$(document).on("click", ".prj", function() {
+	console.log($(this).attr('name'));
+	localStorage.setItem("Project_Name", $(this).attr('name'));
+	localStorage.setItem("Project_Id", this.id);
+	location.replace('tab_memo.html');
+});
+</script>
+</head>
+<body>
+	<div data-role="page" id="demo-page" data-theme="a">
+		<div data-role="header">
+			<h1>프로젝트 선택창</h1>
+			<a href="#addproject" data-rel="popup" data-icon="carat-l"
+			data-position-to="window" data-theme="a">추가</a> <a href="index.html"
+			data-icon="back" data-theme="a">처음으로</a>
+
+			<div data-role="popup" id="addproject" data-theme="a"
+			class="ui-corner-all">
+			<form>
+				<div style="padding: 10px 20px;">
+					<h3>프로젝트 추가</h3>
+					<label for="prj_name">프로젝트명</label> <input type="text"
+					name="prj_name" id="prj_name" value="" data-theme="a"> <label
+					for="prj_date">마감일</label> <input type="date" name="prj_date"
+					id="prj_date" data-clear-btn="true" data-theme="a"> <label
+					for="prj_textarea">상세내용</label>
+					<textarea name="prj_textarea" id="prj_textarea" cols="30" rows="8"
+					data-theme="a"></textarea>
+					<a href='' id="addprj" class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check" 
+					onclick="addproject();">추가</a>	
+
+
+
+				</div>
+			</form>
+		</div>
+		<!-- 추가popup -->
+
+		<div data-role="popup" id="checkdelete" class="ui-corner-all"
+		data-theme="e">
+		<form>
+			<div style="padding: 10px 20px;">
+				<h3>삭제하시겠습니까?</h3>
+				<div data-role="main" class="ui-content">
+					<button type="submit" id="del_prj"
+					class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check ui-btn-inline"
+					onclick="deleteproject();" rel="external">삭제</button>
+					<button type="submit" id="del_cancel"
+					class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check ui-btn-inline"
+					data-rel="back" rel="external">취소</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<!-- 삭제popup -->
+
+</div>
+<!-- /header -->
+
+<div role="main" class="ui-content" data-theme="a">
+	<ul id="pre_list" class="touch" data-role="listview"
+	data-icon="false" data-split-icon="delete" data-theme="a" data-inset="true">
+
+</ul>
+
+</div>
+<!-- /content -->
+
+<div id="checkdelete" class="ui-content" data-role="popup"
+data-overlay-theme="b"
+class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-delete ui-btn-icon-left ui-btn-b"
+data-theme="a">
+<p>삭제하시겠습니까?</p>
+<div role="main" class="ui-content">
+	<a href="#"
+	class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b"
+	data-rel="back" data-transition="flow">삭제</a> <a href="#"
+	class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b"
+	data-rel="back">취소</a>
+</div>
+</div>
+<!-- /popup -->
+</div>
+<!-- /page -->
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html> 
+<html manifest="cache.manifest">
+<head>
+   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+  <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+</head>
+<script>
+$.ajax({
+	url : 'http://54.65.71.36:8080/AppGetVoteInfo',
+	dataType : 'json',
+	type : 'POST',
+	data : {
+		'Vote_Id' : localStorage.getItem('Vote_Id')
+	},
+	success : function(result) {
+		console.log('요긴와진다.');
+		var Vote_Opt = result[0].Vote_Opt;
+		var Vote_Num = result[0].Vote_Num;
+		var big = 0;
+		for(var i = 0; i<Vote_Opt.length; i++){
+			if(big<=Vote_Num[i].num){
+				big = new Array();
+				bigcount = 1;
+				big = Vote_Num[i].num;
+			}		
+		}
+		console.log(Vote_Opt.length);
+		console.log('정보 보여줄게곧');
+		var BigOpt = new Array();
+		var bigcount = 0;
+		var text ='';
+		for(var i = 0; i<Vote_Opt.length; i++){		
+			if(Vote_Num[i].num == big){
+				text += '<li style="background-color: #CCE5FF;">'+Vote_Opt[i]+'<span class="ui-li-count"><strong>'+Vote_Num[i].num+'</strong>표</span></li>';	
+				BigOpt[bigcount] = Vote_Opt[i];
+				bigcount ++;
+			}
+			else{
+			text += '<li>'+Vote_Opt[i]+'<span class="ui-li-count"><strong>'+Vote_Num[i].num+'</strong>표</span></li>';		
+			}
+		}	
+		 $('#vote').append(text).listview('refresh');
+		 $('#votesbj').append(result[0].Vote_Name);
+		 console.log('가장큰것들 출력합니다'+ BigOpt);
+		 
+		 $('#bigprint').append('최다득표는 '+BigOpt+'입니다.');
+	
+		
+	}
+});
+
+</script>
+<body>
+  <div data-role="header" data-theme="a">
+    <h2>득표현황</h2>
+    <a href="#" data-rel="back" data-icon="arrow-l" class="ui-btn-left">뒤로</a>
+  </div>
+
+  <div data-role="content" data-theme="a">
+    <ul data-role="listview" data-inset="false">
+      <li data-role="list-divider" style="text-align: center;"" id = "votesbj"></li>
+    </ul><br><br>
+    
+   <ul data-role="listview" data-inset="true"  id ="vote">
+     <!-- <li style="background-color: #CCE5FF;">한우<span class='ui-li-count'><strong>3</strong>표</span></li> -->
+    </ul>
+    <br>
+  </div>
+
+    <div data-role="footer" data-theme="a">
+      <h2 id = 'bigprint'></h2>
+    </div>
+</body>
+</html>

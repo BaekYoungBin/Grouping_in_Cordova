@@ -1,0 +1,34 @@
+.ui-icon-memo:after {
+    background-image: url("../img/icon/memoicon.jpg");
+	/*background-color: #e0e5e8;*/
+    /* Make your icon fit */
+    background-size: 18px 18px;
+}
+
+.ui-icon-schedule:after {
+    background-image: url("../img/icon/scheduleicon.jpg");
+	/*background-color: #e0e5e8;*/
+    /* Make your icon fit */
+    background-size: 18px 18px;
+}
+
+.ui-icon-addfunc:after {
+    background-image: url("../img/icon/addfuncicon.jpg");
+	/*background-color: #e0e5e8;*/
+    /* Make your icon fit */
+    background-size: 20px 20px;
+}
+
+.ui-icon-chat:after {
+    background-image: url("../img/icon/chaticon.jpg");
+	/*background-color: #e0e5e8;*/
+    /* Make your icon fit */
+    background-size: 19px 19px;
+}
+#access_user .ui-icon-heart:after {
+     background-color: red;
+}
+
+#nonaccess_user .ui-icon-heart:after {
+     background-color: gray;
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html> 
+<html manifest="cache.manifest">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+  <link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+  <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+  <script type="text/javascript" charset="utf-8" src="PushNotification.js"></script>
+  <script type="text/javascript" charset="utf-8" src="js/Get_Reg_ID.js"></script>
+  <script type="text/javascript" charset="utf-8" src="local-notification.js"></script>
+
+</head> 
+<body> 
+
+  <div data-role="page" id="login" data-theme="a">
+    <!-- <div data-role="header">
+      <h1>Mango</h1>
+    </div> -->
+    <div data-role="content" align="center"><br><br>
+      <img src="./img/loginlogo.jpg"   height=200 width=auto><p><br>
+      <input type="text" name="User_Email" placeholder="아이디" id ="User_Email"><p>
+      <input type="password" name="User_Pass" placeholder="비밀번호"id ="User_Pass"><p>
+      <input type="submit" value="log in"id ="getResult">
+      <a href="memberform.html" rel="external">회원가입</a><p>
+      <a href="Find_PW.html" rel="external">pw찾기</a>
+    </div>
+
+    <script type="text/javascript">
+            console.log(localStorage.getItem('User_Name'));
+      console.log('start');
+      $('#getResult').click( function() {
+        console.log('connect');
+        console.log(localStorage.getItem('App_Id'));
+        $('#result').html('');
+        $.ajax({
+          url:'http://54.65.71.36:8080/add',
+          dataType:'json',
+          type:'POST',
+          data:{'User_Email':$('#User_Email').val(),
+          'User_Pass':$('#User_Pass').val(),
+          'AppId' : localStorage.getItem('App_Id')},
+          success:function(result){
+           var dataform = JSON.stringify(result);
+           var temp = JSON.parse(dataform);
+           console.log(temp.User_Name);
+           console.log(temp.User_Pass);
+           console.log(temp.User_AppId);
+           console.log(temp._id);
+           localStorage.setItem("User_Email",temp.User_Email);
+           localStorage.setItem("User_Name",temp.User_Name);
+           localStorage.setItem("User_Pass",temp.User_Pass);
+           localStorage.setItem("User_Id", temp._id);
+           
+
+           location.href = 'project_select.html';
+           $('#output').val(result);
+           $('#result').html(result);
+           if(result['result']==true){
+            $('#result').html(result['msg']);
+          }
+
+  // window.plugin.notification.local.add({ 
+  //                       title       : 'asdasd',
+  //                       message     : 'aedasde'
+  //                   });
+         }
+      });
+})
+</script>
+</body>
+</html>

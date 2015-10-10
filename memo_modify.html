@@ -1,0 +1,194 @@
+<!DOCTYPE html> 
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"	href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+<link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script	src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+
+<script>
+
+$.ajax({
+		url : 'http://54.65.71.36:8080/appgetprojectmember',
+		dataType : 'json',
+		type : 'POST',
+		data : {
+			'Project_Id' : localStorage.getItem('Project_Id')
+		},
+		success : function(result) {
+			var Project_Member_Name = [];
+			var Member_Id = [];
+			var dataform = JSON.stringify(result);
+			var temp = JSON.parse(dataform);
+
+			var count = temp[0].In_Member.length;
+			var list = [];   
+			console.log(count);
+			console.log('success');             
+			for (var i = 0; i < count; i++) {
+				list.push({'user': temp[0].In_Member[i], 'id':temp[0].Member_Id[i]});    
+				console.log(temp[0].In_Member[i]+'/'+temp[0].Member_Id[i]);
+			}
+			var index = 0;
+			var text = "";
+			$.each(list, function(index, item) {
+				text += "<option value="+item.id+">" + item.user
+				+ "</option>";
+			});         
+		$('#select_participant_1').empty();
+		$('#select_participant_1').append(text).selectmenu('refresh');	
+			text = "";
+			index = 0;
+			list = [];	
+			$.ajax({
+				url : 'http://54.65.71.36:8080/appshowmemo',
+				dataType : 'json',
+				type : 'POST',
+				data : {
+					'Project_Work_Id' : localStorage.getItem('Project_Work_Id')
+				},
+				success : function(result1) {
+					console.log('꾸며봅시다');
+					var Work = new Array();	
+					var memodataform = JSON.stringify(result1);
+					var memotemp = JSON.parse(memodataform);
+					var dataform1 = JSON.stringify(result1.Work_Person);
+					var temp1 = JSON.parse(dataform1);		
+					var count2 = temp1.length;	
+					var text = '';
+						if(count2 ==0){
+							text = '';					
+					}
+					else
+						{
+							
+							for(var i = 0; i<count2-1; i++){			
+								text += temp1[i].User_Name + ', ';												
+								console.log(temp1[i].User_Name);
+								$("#select_participant_1 > option[value='"+temp1[i].User_Id+"']").attr("selected", "true");
+								console.log(temp1[i].User_Id);
+							}
+							$("#select_participant_1 > option[value='"+temp1[i].User_Id+"']").attr("selected", "true");	
+							
+							console.log($("#select_participant_1 option:selected").val());
+							text += temp1[i].User_Name;								
+							$("#select_participant_1").selectmenu("refresh");
+							
+						}
+					if(result1.Work_Finish == "true"){
+						$("#memoFinish").val("true").slider().slider("refresh");	
+					}
+					else
+						{			
+							$("#memoFinish").val("false").slider().slider("refresh");
+							console.log($("#memoFinish").val());			
+						}
+					document.temp.selectmemotitle.value = result1.Work_Name;							
+					$("#modify_date1").val(result1.Work_Dday);
+					document.temp.modify_date_start.value = result1.Work_Sday;
+					document.temp.modify_date1.value = result1.Work_Dday;				
+					document.temp.textarea_2.value = result1.Work_Memo;	
+					$("#listviewview").listview("refresh");
+				}
+			});		
+		}		
+	});
+
+function memomodifyfunc(){
+	var Work_Person = new Array();	
+	 var sel = document.getElementsByTagName('select').item(0);
+		console.log($('#select_participant_1 > option:selected').text());
+		$('#select_participant_1 > option:selected').each(function(){
+			var User_Info = new Object();
+			User_Info.User_Name = $(this).text();	 	
+			User_Info.User_Id = $(this).val();
+			console.log(User_Info.User_Name);
+			console.log(User_Info.User_Id);
+			Work_Person.push(User_Info);
+		});	
+		var dataform = JSON.stringify(Work_Person);
+			console.log(dataform);
+		$.ajax({
+            url : 'http://54.65.71.36:8080/appmodifymemo',
+            dataType : 'json',
+            type : 'POST',
+            data : {
+               'Project_Work_Id' : localStorage.getItem('Project_Work_Id'),
+               'Project_Id' : localStorage.getItem('Project_Id'),
+               'Work_Name' : $('#select_memotitle').val(),
+               'Work_Memo' : $('#textarea2').val(),
+               'Work_Sday' : $('#modify_Sday').val(),
+               'Work_Dday' : $('#modify_Dday').val(),
+               'Work_Finish' : $('#memoFinish option:selected').val(),
+               'Work_Person' : dataform
+            },
+            success : function(result) {            
+               location.replace('memo_show.html');   
+            }
+         });      	
+		
+		location.replace('memo_show.html');	
+}
+
+</script>
+</head> 
+<body> 
+
+	<div data-role="page" id="page">
+		<div data-role="header" data-position="fixed">
+			<h4></h4>
+			<a href="#" data-rel="back" data-icon="arrow-l" class="ui-btn-left" data-rel="back">뒤로</a>
+		</div>
+		<div data-role="content">	
+
+			<form name ="temp">
+				<ul data-role="listview" data-inset="false" id = "listviewview">
+					<li>
+						<label for="select-memotitle">메모명</label>
+						<input type="text" name="selectmemotitle" id="select_memotitle" value="">
+					</li>
+					<li class="ui-field-contain">
+						
+						 <select multiple="multiple" data-native-menu="true" name="select_participant_name" id="select_participant_1"
+							>												
+							</select>
+						</li>
+						<li class="ui-field-contain">
+						<h1>
+							<b>업무 완성도</b>
+						</h1>
+						<select id="memoFinish" class = "finish1" name = "memoFinishname" data-role="slider">
+							<option value="false" name ="진행 중">진행 중</option>
+							<option value="true" name = "완료">완료</option>
+						</select>
+					</li>
+						<li class="ui-field-contain">
+                  <label for="memo_date_start">시작일</label> 
+                  <input type="date" name="modify_date_start" id="modify_Sday" data-clear-btn="true" data-theme="a">
+                  
+                     <label for="modify_date">마감일</label>
+                     <input type="date" name="modify_date1" id="modify_Dday" data-clear-btn="true" data-theme="a">
+                  </li>
+							
+						<li class="ui-field-contain">
+							<label for="textarea2">할 일</label>
+							<textarea cols="40" rows="8" name="textarea_2" id="textarea2"></textarea>
+						</li>
+						        
+						<li class="ui-field-contain ui-grid-a">
+							
+							<div class="ui-block-a"><button type="submit" class="ui-btn ui-corner-all ui-btn-a" onclick="memomodifyfunc();" rel="external">확 인</button></div>
+							<div class="ui-block-b"><button type="reset" class="ui-btn ui-corner-all ui-btn-a">초기화</button></div>
+
+						</li>
+					</ul>
+				</form>
+			</div>
+
+		</body>
+		</html>

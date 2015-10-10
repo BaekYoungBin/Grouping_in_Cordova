@@ -1,0 +1,141 @@
+<!DOCTYPE html> 
+<html manifest="cache.manifest">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.css" />
+	<link rel="stylesheet" href="css/themes/MangoApp_theme.min.css" />
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+
+	<script type="text/javascript">
+			// 선택지를 추가하는 함수
+			$(document).on("click", "#add_btn", function() {
+				//$('#add_btn').click(function(){	
+				var n = $('label').last().attr('id'); // 마지막 tr의 id값을 읽어옵니다.
+				console.log(n);
+				n *= 1; // object로 받아온 n을 number변수로 변경합니다. 
+				var trtxt = ''; // 추가할 문자열을 초기화합니다.
+				console.log(n);
+				// 테이블에 추가될 한 행을 작성합니다.
+				trtxt += '<label id=' + (n + 1) + '>선택지' + n + '</label>';
+				trtxt += '<input type="text" name="option">';
+				$('#add').append(trtxt).trigger("create"); // add태그 뒤에 문자열을 추가합니다.						
+				//$('#add').append(trtxt); // add태그 뒤에 문자열을 추가합니다.
+			});
+
+			// 제출시 실행되는 함수
+			
+			$(document).on('click', '#vote_add_btn1', function() {
+				var name = document.getElementById('vote_name').value;
+				var due = document.getElementById('vote_due').value;
+				console.log(due);
+				console.log(name);
+
+
+				var temp = document.getElementsByName('option');
+				var num2 = new Array();
+				var num = new Array();
+				var optarray = new Array();
+				console.log(temp.length);
+				for (var i = 0; i < temp.length; i++) {
+					var qwe = new Object();
+					var qwe2 = new Object();
+					qwe.opt = temp[i].value;
+					qwe.num = 0;
+					num.push(qwe);
+
+					qwe2.opt = temp[i].value;
+					num2.push(qwe2);
+					optarray.push(temp[i].value);
+				//num.push(0);
+			}
+			var ee = JSON.stringify(num);
+			var oo = JSON.stringify(num2);
+			var nn = JSON.stringify(optarray);
+			console.log(optarray[0]);
+			var what = optarray;
+			console.log(localStorage.getItem('Project_Id'));
+			$.ajax({
+				url :'http://54.65.71.36:8080/AppVoteAdd',
+				dataType : 'json',
+				type : 'POST',
+				data : {
+					'Project_Id' : localStorage.getItem('Project_Id'),
+					'Vote_Name' : name,
+					//'Vote_Opt' :oo,
+					'Vote_Num' : ee,
+					'Vote_Dday' : due
+					//'temp': what
+				},
+				success : function(result) {
+					console.log('success');
+					window.location = "vote_list.html";
+				}
+			});
+
+			//prepare();		// prepare()를 호출해 추가된 투표를 투표리스트에 보이도록 합니다.
+		});
+	</script>
+
+	<style type = "text/css">
+		body { 
+			color: #606060;
+			font-family: '함초롬돋움';
+			font-size: 1em;
+			line-height: 20px;
+			text-align: center;
+		}
+		#make_vote{
+			text-align: center;
+		}
+
+		td{
+			border-bottom: 1px solid gray;
+		}
+		input{
+			border: 0;
+		}
+		.btn{
+			background: gray;
+			color: white;
+			border: 2px solid gray;
+			padding: .2em;
+			margin: .2em;
+		}
+	</style>
+
+</head>
+
+<body>
+	<div data-role="header" data-theme="a">
+		<a href="#" data-rel="back" data-icon="arrow-l" class="ui-btn-left">뒤로</a>
+		<h2>투표 추가</h2>
+	</div>
+
+	<div data-role="content" data-theme="a">
+		<form id="make_vote">
+
+			<label>투표 이름</label>
+			<input type="text" name="vote_title" id ="vote_name">
+
+			<label>투표 마감</label>
+			<input type="date" name="vote_date" id = "vote_due">
+
+			<div id="add">
+				<label>선택지1</label>
+				<input type="text" name="option">
+
+
+				<label id="3">선택지2</label>
+				<input type="text" name="option">
+			</div>
+
+			<input type="button"  id="add_btn" class="btn" value="선택지 추가"/><br>
+			<input type="button" id="vote_add_btn1" class="btn" value="투표 만들기">
+		</form>
+	</div>
+</body>
+</html>
